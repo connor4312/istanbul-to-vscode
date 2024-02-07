@@ -10,6 +10,13 @@ export class IstanbulCoverage implements vscode.TestCoverageProvider {
   constructor(protected readonly files: Record<string, FileCoverageData>) {}
 
   /**
+   * If set to true, the executions are set as boolean (covered or not covered)
+   * instead of counts. Tools that don't support fine-grained counts should
+   * set this to true.
+   */
+  public booleanCounts = false;
+
+  /**
    * Called to transform a URI seen in the coverage report. You can for example
    * apply sourcemap transformations here.
    */
@@ -26,7 +33,9 @@ export class IstanbulCoverage implements vscode.TestCoverageProvider {
     base0Line: number,
     base0Column: number,
   ): Promise<vscode.Location | undefined> {
-    return Promise.resolve(new vscode.Location(compiledUri, new vscode.Position(base0Line, base0Column)));
+    return Promise.resolve(
+      new vscode.Location(compiledUri, new vscode.Position(base0Line, base0Column)),
+    );
   }
 
   /** @inheritdoc */
@@ -68,13 +77,13 @@ export class IstanbulCoverage implements vscode.TestCoverageProvider {
               hits += branchHit;
               branchCoverage.push(
                 new vscode.BranchCoverage(
-                  !!branchHit,
+                  this.mapCount(branchHit),
                   location!,
                   branch.type === 'if' ? (i === 0 ? 'if' : 'else') : undefined,
                 ),
               );
             }
-            details.push(new vscode.StatementCoverage(!!hits, loc, branchCoverage));
+            details.push(new vscode.StatementCoverage(this.mapCount(hits), loc, branchCoverage));
           }
         }),
       );
@@ -84,7 +93,7 @@ export class IstanbulCoverage implements vscode.TestCoverageProvider {
       todo.push(
         this.mapRange(file.compiledUri, stmt).then((loc) => {
           if (loc) {
-            details.push(new vscode.StatementCoverage(!!file.original.s[key], loc));
+            details.push(new vscode.StatementCoverage(this.mapCount(file.original.s[key]), loc));
           }
         }),
       );
@@ -94,7 +103,9 @@ export class IstanbulCoverage implements vscode.TestCoverageProvider {
       todo.push(
         this.mapRange(file.compiledUri, stmt.loc).then((loc) => {
           if (loc) {
-            details.push(new vscode.FunctionCoverage(stmt.name, !!file.original.f[key], loc));
+            details.push(
+              new vscode.FunctionCoverage(stmt.name, this.mapCount(file.original.f[key]), loc),
+            );
           }
         }),
       );
@@ -106,10 +117,14 @@ export class IstanbulCoverage implements vscode.TestCoverageProvider {
     return file;
   }
 
+  private mapCount(n: number) {
+    return this.booleanCounts ? n > 0 : n;
+  }
+
   private async mapRange(uri: vscode.Uri, range: IstanbulRange) {
     const [start, end] = await Promise.all([
-      this.mapLocation(uri, range.start.line, range.start.column),
-      this.mapLocation(uri, range.end.line, range.end.column),
+      this.mapLocation(uri, range.start.line - 1, range.start.column),
+      this.mapLocation(uri, range.end.line - 1, range.end.column),
     ]);
     if (start && end) {
       return new vscode.Range(start.range.start, end.range.end);
