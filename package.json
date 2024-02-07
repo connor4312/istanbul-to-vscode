@@ -1,0 +1,34 @@
+{
+  "name": "istanbul-to-vscode",
+  "version": "1.0.0",
+  "description": "Converts Istanbul coverage output to VS Code's coverage API",
+  "main": "index.js",
+  "scripts": {
+    "watch": "tsc -w",
+    "prepack": "tsc && node remove-dts-reference"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/connor4312/istanbul-to-vscode.git"
+  },
+  "keywords": [
+    "vscode",
+    "coverage",
+    "istanbul",
+    "test"
+  ],
+  "author": "Connor Peet <connor@peet.io>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/connor4312/istanbul-to-vscode/issues"
+  },
+  "homepage": "https://github.com/connor4312/istanbul-to-vscode#readme",
+  "devDependencies": {
+    "@types/vscode": "^1.86.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "@types/istanbul-lib-coverage": "^2.0.6"
+  }
+}
