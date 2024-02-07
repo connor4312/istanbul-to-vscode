@@ -1,6 +1,6 @@
 {
   "name": "istanbul-to-vscode",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Converts Istanbul coverage output to VS Code's coverage API",
   "main": "index.js",
   "scripts": {
