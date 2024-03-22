@@ -4,6 +4,7 @@
   "description": "Converts Istanbul coverage output to VS Code's coverage API",
   "main": "index.js",
   "scripts": {
+    "postinstall": "dts main",
     "watch": "tsc -w",
     "prepack": "tsc && node remove-dts-reference"
   },
@@ -24,7 +25,8 @@
   },
   "homepage": "https://github.com/connor4312/istanbul-to-vscode#readme",
   "devDependencies": {
-    "@types/vscode": "^1.86.0",
+    "@types/node": "^18.19.26",
+    "@vscode/dts": "^0.4.0",
     "prettier": "^3.2.5",
     "typescript": "^5.3.3"
   },
