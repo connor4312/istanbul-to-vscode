@@ -24,12 +24,17 @@ export interface IIstanbulCoverageOptions {
   /**
    * Called to transform a URI seen in the coverage report. You can for example
    * apply sourcemap transformations here.
+   *
+   * If the function returns undefined, the file will not be included: you can
+   * use this to handle exclusion logic.
    */
   mapFileUri?(uri: vscode.Uri): Promise<vscode.Uri | undefined>;
 
   /**
    * Called to transform a location seen in the coverage report. You can for
    * example apply sourcemap transformations here.
+   *
+   * If the function returns undefined, the position will not be mapped.
    */
   mapLocation?(uri: vscode.Uri, position: vscode.Position): Promise<vscode.Location | undefined>;
 }
@@ -103,10 +108,12 @@ export class IstanbulCoverageContext {
     await Promise.all(
       Object.values(files).map(async (entry: FileCoverageData) => {
         const compiledUri = vscode.Uri.file(entry.path);
-        const originalUri = (await options.mapFileUri?.(compiledUri)) || compiledUri;
-        run.addCoverage(
-          new IstanbulFileCoverage(originalUri || compiledUri, entry, compiledUri, options),
-        );
+        const originalUri = options.mapFileUri
+          ? await options.mapFileUri?.(compiledUri)
+          : compiledUri;
+        if (originalUri) {
+          run.addCoverage(new IstanbulFileCoverage(originalUri, entry, compiledUri, options));
+        }
       }),
     );
   }
